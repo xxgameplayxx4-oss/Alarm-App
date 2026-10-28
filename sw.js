@@ -1,4 +1,4 @@
-const CACHE = 'pushup-alarm-v6';
+const CACHE = 'pushup-alarm-v7';
 const ASSETS = [
   './',
   './index.html',
@@ -6,6 +6,7 @@ const ASSETS = [
   './js/app.js',
   './js/pose.js',
   './js/alarm.js',
+  './js/android.js',
   './css/missions.css',
   './js/missions/index.js',
   './js/missions/camera-mission.js',

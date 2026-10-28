@@ -1,0 +1,55 @@
+name: Android APK
+
+on:
+  push:
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '17'
+
+      - uses: gradle/actions/setup-gradle@v4
+        with:
+          gradle-version: '8.9'
+
+      - name: Build APK
+        env:
+          VERSION_CODE: ${{ github.run_number }}
+          VERSION_NAME: ${{ github.run_number }}
+        run: |
+          android/prepare-web.sh
+          gradle -p android assembleRelease --no-daemon
+          cp android/app/build/outputs/apk/release/app-release.apk PushupAlarm.apk
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: PushupAlarm-apk
+          path: PushupAlarm.apk
+
+      # Builds from main replace the APK on the "android-latest" release; builds from
+      # any other branch replace it on the "android-preview" pre-release. Either way
+      # the download link never changes and works on a phone without a GitHub login.
+      - name: Publish release
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          if [ "$GITHUB_REF" = refs/heads/main ]; then
+            tag=android-latest; title="Android APK (latest)"; pre=""
+          else
+            tag=android-preview; title="Android APK (preview: ${GITHUB_REF_NAME})"; pre="--prerelease"
+          fi
+          gh release delete "$tag" --yes --cleanup-tag || true
+          gh release create "$tag" PushupAlarm.apk $pre \
+            --title "$title" \
+            --notes "Built from ${GITHUB_REF_NAME} at ${GITHUB_SHA::7}. Download PushupAlarm.apk on your Android phone and open it to install." \
+            --target "$GITHUB_SHA"

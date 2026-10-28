@@ -1,2 +1,8 @@
 node_modules/
 .DS_Store
+android/.gradle/
+android/build/
+android/app/build/
+android/app/src/main/assets/www/
+android/app/src/main/res/mipmap-xxxhdpi/
+android/local.properties

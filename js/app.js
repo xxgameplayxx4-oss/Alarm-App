@@ -1,6 +1,7 @@
 // Push-up Alarm — multi-mission alarm: UI + flow controller.
 import { createAlarm } from './alarm.js';
 import { MISSIONS, loadMissions } from './missions/index.js';
+import { native, initAndroid, quietNativeWhen, stopNative, nativeRinging } from './android.js';
 
 const $ = (id) => document.getElementById(id);
 const body = document.body;
@@ -247,6 +248,7 @@ function beginRun({ fromGesture }) {
     }, 1000);
   }
   show('mission');
+  quietNativeWhen(() => alarm.isRunning);
   requestWakeLock();
   if (!fromGesture) permPromise = armGesture(wantMotion);
   mountMission(0);
@@ -277,6 +279,7 @@ function recordSkip() { store.set('pa.streak', 0); store.set('pa.lastSkip', dayK
 
 /* ---------- finish / skip ---------- */
 function silence() {
+  stopNative();
   clearInterval(timerId); clearInterval(rampId);
   disarmGesture();
   try { alarm.stop(); } catch (e) { console.error(e); }
@@ -395,7 +398,12 @@ async function requestWakeLock() {
 function releaseWakeLock() { try { wakeLock && wakeLock.release(); } catch { /* ignore */ } wakeLock = null; }
 document.addEventListener('visibilitychange', () => {
   if (document.visibilityState !== 'visible') return;
-  if (phase === 'mission' || phase === 'alarming') { try { alarm.start(); } catch (e) { console.error(e); } }
+  if (phase === 'mission' || phase === 'alarming') {
+    try { alarm.start(); } catch (e) { console.error(e); }
+    if (phase === 'mission') quietNativeWhen(() => alarm.isRunning);
+  }
+  // Android: opened from the launcher while an alarm rings.
+  if (phase === 'start' && nativeRinging() && activePlan().length) beginRun({ fromGesture: false });
   if (phase === 'mission' || phase === 'done' || phase === 'check') requestWakeLock();
   if (phase === 'done' || phase === 'check') checkTick();
 });
@@ -562,6 +570,8 @@ $('btn-open-shortcuts').addEventListener('click', () => { location.href = 'short
 $('btn-a2hs').addEventListener('click', () => { $('a2hs-hint').hidden = false; });
 renderSetup();
 
+initAndroid({ canOpen: () => phase === 'start' });
+
 /* ---------- boot ---------- */
 $('btn-start').disabled = true;
 loadMissions().then(() => {
@@ -577,7 +587,8 @@ loadMissions().then(() => {
 // files show up, but never in the middle of a mission.
 let swReg = null;
 try {
-  if ('serviceWorker' in navigator) {
+  // The Android app ships these files inside the APK, so it needs no offline cache.
+  if ('serviceWorker' in navigator && !native) {
     navigator.serviceWorker.register('./sw.js', { updateViaCache: 'none' })
       .then((r) => { swReg = r; r.update().catch(() => {}); })
       .catch(() => {});

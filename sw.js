@@ -1,4 +1,4 @@
-const CACHE = 'pushup-alarm-v5';
+const CACHE = 'pushup-alarm-v6';
 const ASSETS = [
   './',
   './index.html',

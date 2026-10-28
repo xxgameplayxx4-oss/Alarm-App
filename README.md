@@ -20,16 +20,16 @@ All processing happens on the phone, and video never leaves the device.
 ## URL options
 - `?m=math,pushups` runs these missions for this run only, without changing your saved plan.
 - `?n=20` sets the count for the first push-up or squat mission.
-- `?auto=1` shows the "Alarm! Tap to start" banner (use this one in the Shortcut).
+- `?auto=1` starts the missions immediately, no START press (use this one in the Shortcut).
 
 ## iPhone setup
 1. Open the site in Safari, then tap **Share → Add to Home Screen**.
 2. Open it once, tap ⚙️ to pick your missions, and allow camera and motion access when asked.
 3. Open the **Shortcuts** app, then go to **Automation → + → Alarm → "Is Stopped"** (any alarm, or pick one), and choose **Run Immediately**.
    Add the actions **Set Volume 100%** and **Open URLs** with `https://xxgameplayxx4-oss.github.io/Alarm-App/?auto=1`.
-4. When the alarm stops, the page opens. Tap **START**, and the siren keeps playing until your missions are done.
+4. When the alarm stops, the page opens and the missions start by themselves. If the siren is silent, tap anywhere on the page once (a red banner tells you). The siren keeps playing until your missions are done.
 
-Limits: iOS needs one tap before a web page can play sound, and the siren pauses if you leave the page. It restarts when you come back.
+Limits: with `?auto=1` the missions start by themselves, but iOS may still block sound until your first tap anywhere (a red banner says so; that tap also turns the siren on and is not swallowed). Brain missions get that tap naturally. The siren also pauses if you leave the page. It restarts when you come back.
 
 ## Development
 Static files and no build step. Run `python3 -m http.server`, then the tests with `node tests/<name>.test.mjs`.

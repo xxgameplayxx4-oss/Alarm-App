@@ -181,5 +181,7 @@ export function createAlarm() {
   return {
     unlock, start, stop, setVolume, playSuccess,
     get isPlaying() { return playing; },
+    get contextState() { return ctx ? ctx.state : 'none'; },
+    get isRunning() { return !!ctx && ctx.state === 'running'; },
   };
 }

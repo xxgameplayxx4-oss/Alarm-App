@@ -225,3 +225,11 @@ input[type=range] { width: 100%; height: 36px; accent-color: var(--orange); marg
 /* version / update row in settings */
 .version-row { display: flex; align-items: center; justify-content: space-between; gap: 12px; margin-top: 18px; }
 .version-row .fine { margin: 0; }
+
+/* ---------- audio-locked banner (auto-start) ---------- */
+.audio-banner { position: fixed; top: 0; left: 0; right: 0; z-index: 50; padding: calc(env(safe-area-inset-top, 0px) + 8px) 12px 10px; text-align: center;
+  font-weight: 800; font-size: 17px; color: #fff; background: #e5121f; pointer-events: none; animation: audio-flash .8s steps(2) infinite; }
+.audio-banner[hidden] { display: none; }
+@keyframes audio-flash { 0% { background: #e5121f; } 50% { background: #7a0007; } }
+@media (prefers-reduced-motion: reduce) { .audio-banner { animation: none; } }
+body.audio-locked #screen-mission .workout-top { margin-top: calc(env(safe-area-inset-top, 0px) + 34px); }

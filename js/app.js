@@ -160,24 +160,78 @@ function missionFinished(ctrl) {
   }, 900);
 }
 
-$('btn-start').addEventListener('click', () => {
+/* ---------- audio-locked fallback (auto-start without a gesture) ---------- */
+const needsMotionPerm = () => typeof DeviceMotionEvent !== 'undefined' && !!DeviceMotionEvent.requestPermission;
+let gestureArmed = false, motionDeferred = null, audioPoll = 0;
+const GESTURE_EVENTS = ['pointerdown', 'touchend', 'click'];
+function setBanner(on, text) {
+  const b = $('audio-banner');
+  if (text) b.textContent = text;
+  b.hidden = !on;
+  body.classList.toggle('audio-locked', on);
+}
+function disarmGesture() {
+  if (gestureArmed) GESTURE_EVENTS.forEach((ev) => document.removeEventListener(ev, onFirstGesture, true));
+  gestureArmed = false; motionDeferred = null;
+  clearInterval(audioPoll); audioPoll = 0;
+  setBanner(false);
+}
+function armGesture(wantMotion) {
+  disarmGesture();
+  let promise = null;
+  if (wantMotion) {
+    promise = new Promise((resolve, reject) => { motionDeferred = { resolve, reject }; });
+    promise.catch(() => {});
+  }
+  GESTURE_EVENTS.forEach((ev) => document.addEventListener(ev, onFirstGesture, true));
+  gestureArmed = true;
+  // Give an allowed AudioContext a moment to reach 'running' before showing the banner.
+  setTimeout(() => {
+    if (!gestureArmed || phase !== 'mission') return;
+    if (alarm.isRunning && !motionDeferred) { disarmGesture(); return; }
+    setBanner(true, alarm.isRunning ? '👆 Tap anywhere to allow motion' : '🔇 Tap anywhere to turn on the siren');
+  }, 400);
+  // If the context gets allowed on its own later, drop the banner.
+  audioPoll = setInterval(() => {
+    if (!alarm.isRunning) return;
+    if (motionDeferred) setBanner(!$('audio-banner').hidden, '👆 Tap anywhere to allow motion'); else disarmGesture();
+  }, 400);
+  return promise;
+}
+function onFirstGesture() {
+  // Never preventDefault / stopPropagation: the tap still reaches whatever was under the finger.
+  if (phase !== 'mission') { disarmGesture(); return; }
+  try { if (navigator.audioSession) navigator.audioSession.type = 'playback'; } catch { /* ignore */ }
+  try { alarm.unlock(); } catch (e) { console.error(e); }
+  try { alarm.start(); } catch (e) { console.error(e); } // no-op if already scheduled; unlock() resumed the context
+  if (motionDeferred) {
+    const d = motionDeferred; motionDeferred = null;
+    try { d.resolve(DeviceMotionEvent.requestPermission()); } catch (e) { d.reject(e); }
+  }
+  setBanner(false);
+  setTimeout(() => {
+    if (phase !== 'mission' || !gestureArmed) return;
+    if (alarm.isRunning) { disarmGesture(); } else { setBanner(true, '🔇 Tap anywhere to turn on the siren'); }
+  }, 600);
+}
+
+function beginRun({ fromGesture }) {
   if (phase !== 'start') return;
   const ap = activePlan();
   if (!ap.length) return;
   // iOS: ignore the silent switch for Web Audio.
   try { if (navigator.audioSession) navigator.audioSession.type = 'playback'; } catch { /* ignore */ }
-  // Everything below runs synchronously inside the gesture.
   try { alarm.unlock(); } catch (e) { console.error(e); }
   clearInterval(rampId);
   if (settings.ramp) alarm.setVolume(settings.volume * 0.4); else alarm.setVolume(settings.volume);
   try { alarm.start(); } catch (e) { console.error(e); }
+  const wantMotion = ap.some((p) => byId(p.id).needs === 'motion') && needsMotionPerm();
   let permPromise = null;
-  try {
-    if (ap.some((p) => byId(p.id).needs === 'motion') && typeof DeviceMotionEvent !== 'undefined' && DeviceMotionEvent.requestPermission) {
-      permPromise = DeviceMotionEvent.requestPermission().catch((e) => { throw e; });
-      permPromise.catch(() => {});
-    }
-  } catch (e) { console.error(e); }
+  if (fromGesture) {
+    try {
+      if (wantMotion) { permPromise = DeviceMotionEvent.requestPermission(); permPromise.catch(() => {}); }
+    } catch (e) { console.error(e); }
+  }
   runPlan = ap.map((p) => ({ id: p.id, config: { ...p.config } }));
   cancelCheck();
   startedAt = Date.now();
@@ -194,9 +248,11 @@ $('btn-start').addEventListener('click', () => {
   }
   show('mission');
   requestWakeLock();
+  if (!fromGesture) permPromise = armGesture(wantMotion);
   mountMission(0);
   startCurrent(permPromise);
-});
+}
+$('btn-start').addEventListener('click', () => beginRun({ fromGesture: true }));
 $('btn-retry').addEventListener('click', () => {
   if (!current) return;
   // Mount a fresh instance so the mission starts from a clean state (inside this gesture).
@@ -222,6 +278,7 @@ function recordSkip() { store.set('pa.streak', 0); store.set('pa.lastSkip', dayK
 /* ---------- finish / skip ---------- */
 function silence() {
   clearInterval(timerId); clearInterval(rampId);
+  disarmGesture();
   try { alarm.stop(); } catch (e) { console.error(e); }
   alarm.setVolume(settings.volume);
   stopCurrent();
@@ -512,6 +569,7 @@ loadMissions().then(() => {
   phase = 'start';
   refreshStart();
   show('start');
+  if (params.get('auto') === '1' && activePlan().length) beginRun({ fromGesture: false });
 });
 
 /* ---------- updates ---------- */

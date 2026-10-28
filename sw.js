@@ -1,4 +1,4 @@
-const CACHE = 'pushup-alarm-v3';
+const CACHE = 'pushup-alarm-v4';
 const ASSETS = [
   './',
   './index.html',
@@ -17,6 +17,7 @@ const ASSETS = [
   './js/missions/shake.js',
   './js/missions/steps.js',
   './manifest.webmanifest',
+  './version.txt',
   './icons/icon-192.png',
   './icons/icon-512.png',
   './icons/icon-maskable-512.png',
@@ -56,18 +57,28 @@ self.addEventListener('fetch', (event) => {
   if (req.method !== 'GET') return;
   const url = new URL(req.url);
   if (url.origin !== self.location.origin) return;
+  // Big, rarely-changing files: cache-first. App code and pages: network-first,
+  // so a new deploy shows up on the next open; cache is the offline fallback.
+  const cacheFirst = /\/(vendor|icons)\//.test(url.pathname);
   event.respondWith((async () => {
     const cache = await caches.open(CACHE);
-    // ignoreSearch so "?n=20&auto=1" launches hit the cached shell.
-    const hit = await cache.match(req, { ignoreSearch: true });
-    if (hit) return hit;
+    if (cacheFirst) {
+      const hit = await cache.match(req, { ignoreSearch: true });
+      if (hit) return hit;
+    }
     try {
-      const res = await fetch(req);
-      if (res && res.ok && res.type === 'basic') cache.put(req, res.clone()).catch(() => {});
+      const res = await fetch(req, cacheFirst ? undefined : { cache: 'no-cache' });
+      if (res && res.ok && res.type === 'basic') {
+        // Store launches like "?auto=1" under the bare page URL.
+        const key = req.mode === 'navigate' ? new URL('./', self.location).href : req;
+        cache.put(key, res.clone()).catch(() => {});
+      }
       return res;
     } catch (e) {
+      const hit = await cache.match(req, { ignoreSearch: true });
+      if (hit) return hit;
       if (req.mode === 'navigate') {
-        const shell = await cache.match('./index.html');
+        const shell = (await cache.match('./')) || (await cache.match('./index.html'));
         if (shell) return shell;
       }
       throw e;

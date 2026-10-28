@@ -80,7 +80,9 @@ function activePlan() { return plan.filter((p) => byId(p.id)); }
 function refreshStart() {
   const ap = activePlan();
   $('start-icons').textContent = ap.map((p) => byId(p.id).icon).join(' ');
-  $('start-summary').textContent = ap.length === 1 ? 'mission to silence it' : 'missions to silence it';
+  $('start-summary').textContent = ap.length === 1
+    ? `${byId(ap[0].id).name} to silence it`
+    : `${ap.length} missions to silence it`;
   $('btn-start').disabled = !ap.length;
   if (!ap.length && phase !== 'loading') $('start-icons').textContent = '⚠️';
 }
@@ -512,6 +514,39 @@ loadMissions().then(() => {
   show('start');
 });
 
+/* ---------- updates ---------- */
+// A new service worker takes over as soon as it installs; reload once so the new
+// files show up, but never in the middle of a mission.
+let swReg = null;
 try {
-  if ('serviceWorker' in navigator) navigator.serviceWorker.register('./sw.js').catch(() => {});
+  if ('serviceWorker' in navigator) {
+    navigator.serviceWorker.register('./sw.js', { updateViaCache: 'none' })
+      .then((r) => { swReg = r; r.update().catch(() => {}); })
+      .catch(() => {});
+    // First install also fires controllerchange; only reload when replacing an old worker.
+    let reloaded = !navigator.serviceWorker.controller;
+    navigator.serviceWorker.addEventListener('controllerchange', () => {
+      if (reloaded || (phase !== 'start' && phase !== 'loading')) return;
+      reloaded = true;
+      location.reload();
+    });
+    document.addEventListener('visibilitychange', () => {
+      if (document.visibilityState === 'visible' && swReg) swReg.update().catch(() => {});
+    });
+  }
 } catch { /* ignore */ }
+
+fetch('./version.txt', { cache: 'no-store' })
+  .then((r) => (r.ok ? r.text() : ''))
+  .then((v) => { $('app-version').textContent = v.trim() || '?'; })
+  .catch(() => { $('app-version').textContent = 'offline'; });
+
+$('btn-update').addEventListener('click', async () => {
+  $('btn-update').textContent = 'Updating…';
+  try {
+    const keys = await caches.keys();
+    await Promise.all(keys.map((k) => caches.delete(k)));
+    if (swReg) await swReg.update();
+  } catch { /* ignore */ }
+  location.reload();
+});

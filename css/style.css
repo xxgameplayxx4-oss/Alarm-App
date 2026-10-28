@@ -221,3 +221,7 @@ input[type=range] { width: 100%; height: 36px; accent-color: var(--orange); marg
 .a2hs .note { margin: 10px 0 0; }
 .fine.honest { text-align: center; margin: 22px 0 0; font-size: 14px; }
 @media (max-height: 700px) { .setup-btn { min-height: 44px; margin-bottom: 8px; } }
+
+/* version / update row in settings */
+.version-row { display: flex; align-items: center; justify-content: space-between; gap: 12px; margin-top: 18px; }
+.version-row .fine { margin: 0; }

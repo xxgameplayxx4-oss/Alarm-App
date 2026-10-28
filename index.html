@@ -144,7 +144,7 @@
 <div id="setup" class="setup" aria-hidden="true">
   <div class="setup-scroll" role="dialog" aria-label="Auto-open setup">
     <div class="sheet-head"><h2>Auto-open</h2><button id="btn-close-setup" class="btn small" type="button">Done</button></div>
-    <p class="fine left">Make your phone open this alarm by itself when your Clock alarm stops. Five taps, once.</p>
+    <p class="fine left">Make this page open by itself when your Clock alarm stops. One-time setup, about 2 minutes.</p>
     <ol class="steps">
       <li class="step" data-step="0">
         <label class="step-head"><input type="checkbox"><span class="num">1</span><b>Copy your alarm link</b></label>
@@ -154,24 +154,29 @@
         </div>
       </li>
       <li class="step" data-step="1">
-        <label class="step-head"><input type="checkbox"><span class="num">2</span><b>Open Shortcuts</b></label>
+        <label class="step-head"><input type="checkbox"><span class="num">2</span><b>Make the shortcut</b></label>
         <div class="step-body">
-          <p>Tap <b>Automation</b> at the bottom, then <b>+</b> (or <b>New Automation</b>).</p>
           <button id="btn-open-shortcuts" class="btn" type="button">Open Shortcuts ↗</button>
+          <p>Bottom tab <b>Shortcuts</b> → <b>+</b> (top right).</p>
+          <p>Tap <b>Search Actions</b>, type <b>open url</b>, tap <b>Open URLs</b>.</p>
+          <p>Tap the blue <b>URL</b> → <b>Paste</b>.</p>
+          <p>Tap the name at the top → <b>Rename</b> → <b>Push-up Alarm</b> → <b>Done</b>.</p>
         </div>
       </li>
       <li class="step" data-step="2">
-        <label class="step-head"><input type="checkbox"><span class="num">3</span><b>Pick the trigger</b></label>
+        <label class="step-head"><input type="checkbox"><span class="num">3</span><b>Run it when the alarm stops</b></label>
         <div class="step-body">
-          <p>Choose <b>Alarm</b> → <b>Is Stopped</b> → pick <b>Any</b> or your wake-up alarm → <b>Run Immediately</b> → Next/Done.</p>
-          <p class="note">iOS 17/18 shows Run Immediately as an option. Older iOS has a toggle instead: turn off “Ask Before Running”.</p>
+          <p>Bottom tab <b>Automation</b> → <b>+</b> → <b>Alarm</b>.</p>
+          <p>Pick <b>Is Stopped</b> and <b>Run Immediately</b> → <b>Next</b>.</p>
+          <p>Under <b>My Shortcuts</b>, tap <b>Push-up Alarm</b>. Done.</p>
+          <p class="note">Older iOS: tap <b>Add Action</b> → search <b>run shortcut</b> → pick Push-up Alarm, and turn off “Ask Before Running”.</p>
         </div>
       </li>
       <li class="step" data-step="3">
-        <label class="step-head"><input type="checkbox"><span class="num">4</span><b>Add two actions</b></label>
+        <label class="step-head"><input type="checkbox"><span class="num">4</span><b>Keep it loud</b></label>
         <div class="step-body">
-          <p>Search <b>Set Volume</b> → set it to 100%.</p>
-          <p>Search <b>Open URLs</b> → paste the link from step 1.</p>
+          <p>Leave your media volume up. The siren follows the volume buttons, not the ringer.</p>
+          <p class="note">Optional: in the Push-up Alarm shortcut, add <b>Set Volume</b> (search “volume”) at 100% above Open URLs.</p>
         </div>
       </li>
       <li class="step" data-step="4">

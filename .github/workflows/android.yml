@@ -36,15 +36,20 @@ jobs:
           name: PushupAlarm-apk
           path: PushupAlarm.apk
 
-      # Builds from main replace the APK on the "android-latest" release, so the
-      # download link never changes.
+      # Builds from main replace the APK on the "android-latest" release; builds from
+      # any other branch replace it on the "android-preview" pre-release. Either way
+      # the download link never changes and works on a phone without a GitHub login.
       - name: Publish release
-        if: github.ref == 'refs/heads/main'
         env:
           GH_TOKEN: ${{ github.token }}
         run: |
-          gh release delete android-latest --yes --cleanup-tag || true
-          gh release create android-latest PushupAlarm.apk \
-            --title "Android APK (latest)" \
-            --notes "Built from ${GITHUB_SHA::7}. Download PushupAlarm.apk on your Android phone and open it to install." \
+          if [ "$GITHUB_REF" = refs/heads/main ]; then
+            tag=android-latest; title="Android APK (latest)"; pre=""
+          else
+            tag=android-preview; title="Android APK (preview: ${GITHUB_REF_NAME})"; pre="--prerelease"
+          fi
+          gh release delete "$tag" --yes --cleanup-tag || true
+          gh release create "$tag" PushupAlarm.apk $pre \
+            --title "$title" \
+            --notes "Built from ${GITHUB_REF_NAME} at ${GITHUB_SHA::7}. Download PushupAlarm.apk on your Android phone and open it to install." \
             --target "$GITHUB_SHA"

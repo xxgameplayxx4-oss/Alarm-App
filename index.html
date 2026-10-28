@@ -36,7 +36,8 @@
     </button>
   </div>
   <div class="start-bottom">
-    <button id="btn-setup" class="setup-btn" type="button">⏰ Set up auto-open <span class="badge" data-setup-badge hidden>Done ✓</span></button>
+    <button id="btn-alarms" class="setup-btn" type="button" data-android-only>⏰ Alarms</button>
+    <button id="btn-setup" class="setup-btn" type="button" data-ios-only>⏰ Set up auto-open <span class="badge" data-setup-badge hidden>Done ✓</span></button>
     <div class="target-chip"><b id="start-icons"></b><span id="start-summary">missions to silence it</span></div>
     <p class="fine">Siren starts when you tap. Finish every mission to stop it.</p>
   </div>
@@ -130,6 +131,8 @@
     <div class="check-min" id="check-min-row">Check after <input id="set-check-min" type="number" inputmode="numeric" min="1" max="30" value="3"> min</div>
     <button id="btn-test" class="btn" type="button">Test siren</button>
 
+    <button id="btn-alarms2" class="setup-btn wide" type="button" data-android-only>⏰ Alarm times</button>
+    <div data-ios-only>
     <label class="field-label" for="set-url">Shortcut link</label>
     <p class="fine left">Use this in the Shortcuts automation “Open URL”. Add <code>?n=20</code> to change the count.</p>
     <div class="url-row">
@@ -137,6 +140,7 @@
       <button id="btn-copy" class="btn small" type="button">Copy</button>
     </div>
     <button id="btn-setup2" class="setup-btn wide" type="button">⏰ Set up auto-open <span class="badge" data-setup-badge hidden>Done ✓</span></button>
+    </div>
     <div class="version-row"><span class="fine left">Version <b id="app-version">…</b></span><button id="btn-update" class="btn small" type="button">Get latest version</button></div>
   </div>
 </div>
@@ -192,6 +196,20 @@
       </li>
     </ol>
     <p class="fine honest">iPhone doesn't allow websites to create automations, so these taps have to be done by you, once.</p>
+  </div>
+</div>
+
+<!-- 6. ANDROID ALARMS (Android app only) -->
+<div id="alarms" class="setup" aria-hidden="true" data-android-only>
+  <div class="setup-scroll" role="dialog" aria-label="Alarms">
+    <div class="sheet-head"><h2>Alarms</h2><button id="btn-close-alarms" class="btn small" type="button">Done</button></div>
+    <p class="fine left">The alarm rings at full volume, even with the app closed, until you finish your missions. Leaving the app doesn't stop it.</p>
+    <p class="fine left" id="alarms-next"></p>
+    <div class="perm" id="perm-notif" hidden>Notifications are off, so the alarm can't show. <button id="btn-perm-notif" class="btn small" type="button">Turn on</button></div>
+    <div class="perm" id="perm-full" hidden>Allow full-screen alerts so the alarm opens over the lock screen. <button id="btn-perm-full" class="btn small" type="button">Allow</button></div>
+    <ul id="alarms-list" class="al-list"></ul>
+    <button id="btn-alarm-add" class="btn primary" type="button">+ Add alarm</button>
+    <button id="btn-alarm-test" class="setup-btn wide" type="button">Test alarm in 10 s</button>
   </div>
 </div>
 

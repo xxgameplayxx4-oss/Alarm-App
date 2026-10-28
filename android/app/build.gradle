@@ -1,0 +1,47 @@
+plugins {
+    id 'com.android.application'
+}
+
+android {
+    namespace 'io.github.xxgameplayxx4.pushupalarm'
+    compileSdk 34
+
+    defaultConfig {
+        applicationId 'io.github.xxgameplayxx4.pushupalarm'
+        minSdk 26
+        targetSdk 34
+        versionCode Integer.parseInt(System.getenv('VERSION_CODE') ?: '1')
+        versionName System.getenv('VERSION_NAME') ?: 'dev'
+    }
+
+    signingConfigs {
+        // Fixed, throwaway key committed on purpose: every build is signed the same way,
+        // so a new APK installs over the old one and keeps your alarms and settings.
+        shared {
+            storeFile file('sideload.keystore')
+            storePassword 'pushupalarm'
+            keyAlias 'pushupalarm'
+            keyPassword 'pushupalarm'
+        }
+    }
+
+    buildTypes {
+        debug { signingConfig signingConfigs.shared }
+        release {
+            minifyEnabled false
+            signingConfig signingConfigs.shared
+        }
+    }
+
+    lint { checkReleaseBuilds false }
+
+    compileOptions {
+        sourceCompatibility JavaVersion.VERSION_17
+        targetCompatibility JavaVersion.VERSION_17
+    }
+}
+
+dependencies {
+    implementation 'androidx.core:core:1.13.1'
+    implementation 'androidx.webkit:webkit:1.11.0'
+}

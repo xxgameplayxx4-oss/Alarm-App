@@ -191,3 +191,33 @@ input[type=range] { width: 100%; height: 36px; accent-color: var(--orange); marg
 .toggle input::after { content: ""; position: absolute; top: 3px; left: 3px; width: 26px; height: 26px; border-radius: 50%; background: #fff; transition: transform .2s; }
 .toggle input:checked { background: var(--orange); }
 .toggle input:checked::after { transform: translateX(20px); }
+
+/* ---------- auto-open setup ---------- */
+.setup-btn { display: inline-flex; align-items: center; justify-content: center; gap: 8px; min-height: 48px; padding: 0 18px; margin: 0 0 14px; border-radius: 14px; background: rgba(255,255,255,.07); border: 1px solid rgba(255,255,255,.12); color: var(--dim); font-weight: 700; font-size: 15px; }
+.setup-btn:active { transform: scale(.97); }
+.setup-btn.wide { display: flex; width: 100%; margin: 22px 0 0; color: var(--orange); background: rgba(255,138,31,.16); border: 0; }
+.badge { padding: 3px 8px; border-radius: 999px; background: rgba(53,224,138,.18); color: var(--green); font-size: 12px; font-weight: 800; }
+.setup { position: fixed; inset: 0; z-index: 60; background: var(--bg); visibility: hidden; opacity: 0; transform: translateY(24px); transition: opacity .3s, transform .3s, visibility 0s linear .3s; }
+.setup.open { visibility: visible; opacity: 1; transform: none; transition-delay: 0s; }
+.setup-scroll { position: absolute; inset: 0; overflow-y: auto; overscroll-behavior: contain; -webkit-overflow-scrolling: touch; touch-action: pan-y; user-select: text;
+  padding: calc(var(--sat) + 16px) calc(var(--sar) + 20px) calc(var(--sab) + 32px) calc(var(--sal) + 20px); background: radial-gradient(120% 40% at 50% 0%, var(--bg2), var(--bg)); }
+.steps { list-style: none; margin: 14px 0 0; padding: 0; display: grid; gap: 12px; }
+.step { background: rgba(255,255,255,.06); border-radius: 18px; overflow: hidden; border: 1px solid transparent; transition: border-color .2s, opacity .2s; }
+.step.done { border-color: rgba(53,224,138,.45); }
+.step.done .step-body { opacity: .55; }
+.step-head { display: flex; align-items: center; gap: 12px; min-height: 60px; padding: 8px 14px; font-size: 18px; cursor: pointer; }
+.step-head .num { order: 0; width: 32px; height: 32px; flex: none; border-radius: 50%; background: var(--grad); display: grid; place-items: center; font-weight: 900; font-size: 16px; font-family: var(--display); }
+.step.done .num { background: var(--green); color: #052; }
+.step-head b { flex: 1; }
+.step-head input { order: 2; -webkit-appearance: none; appearance: none; margin: 0; width: 32px; height: 32px; flex: none; border-radius: 10px; background: rgba(255,255,255,.14); position: relative; }
+.step-head input:checked { background: var(--green); }
+.step-head input:checked::after { content: "✓"; position: absolute; inset: 0; display: grid; place-items: center; color: #052; font-weight: 900; font-size: 20px; }
+.step-body { padding: 0 14px 16px 58px; }
+.step-body p { margin: 0 0 10px; font-size: 16px; line-height: 1.4; }
+.step-body .btn { width: 100%; }
+.note { color: var(--dim); font-size: 13px !important; }
+.link-box { display: block; padding: 12px; margin-bottom: 10px; border-radius: 12px; word-break: break-all; font-size: 13px; line-height: 1.35; }
+.a2hs { margin-top: 12px; }
+.a2hs .note { margin: 10px 0 0; }
+.fine.honest { text-align: center; margin: 22px 0 0; font-size: 14px; }
+@media (max-height: 700px) { .setup-btn { min-height: 44px; margin-bottom: 8px; } }

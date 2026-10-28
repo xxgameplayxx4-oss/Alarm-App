@@ -320,7 +320,7 @@ sos.addEventListener('contextmenu', (e) => e.preventDefault());
 // No rubber-band scroll outside the settings sheet and mission content that needs it.
 document.addEventListener('touchmove', (e) => {
   if (phase === 'start' || phase === 'done' || phase === 'check' || phase === 'alarming' || phase === 'mission') {
-    if (!e.target.closest('.sheet-panel')) e.preventDefault();
+    if (!e.target.closest('.sheet-panel, .setup-scroll')) e.preventDefault();
   }
 }, { passive: false });
 
@@ -450,6 +450,58 @@ $('btn-copy').addEventListener('click', async () => {
   catch { e.select(); e.setSelectionRange(0, 9999); try { document.execCommand('copy'); } catch { /* ignore */ } }
   b.textContent = 'Copied'; setTimeout(() => { b.textContent = 'Copy'; }, 1500);
 });
+
+/* ---------- auto-open setup ---------- */
+const setupEl = $('setup');
+const stepEls = [...setupEl.querySelectorAll('.step')];
+let setupDone = [false, false, false, false, false];
+try {
+  const v = JSON.parse(localStorage.getItem('pa.setup'));
+  if (Array.isArray(v)) setupDone = setupDone.map((_, i) => v[i] === true);
+} catch { /* ignore */ }
+function autoUrl() { return location.origin + location.pathname + '?auto=1'; }
+function renderSetup() {
+  stepEls.forEach((el, i) => {
+    el.classList.toggle('done', setupDone[i]);
+    el.querySelector('input').checked = setupDone[i];
+  });
+  const all = setupDone.every(Boolean);
+  document.querySelectorAll('[data-setup-badge]').forEach((b) => { b.hidden = !all; });
+}
+stepEls.forEach((el, i) => el.querySelector('input').addEventListener('change', (e) => {
+  setupDone[i] = e.target.checked;
+  try { localStorage.setItem('pa.setup', JSON.stringify(setupDone)); } catch { /* ignore */ }
+  renderSetup();
+}));
+const isStandalone = () => navigator.standalone === true || (window.matchMedia && matchMedia('(display-mode: standalone)').matches);
+function openSetup() {
+  $('setup-url').textContent = autoUrl();
+  $('a2hs').hidden = isStandalone();
+  $('a2hs-hint').hidden = true;
+  renderSetup();
+  setupEl.classList.add('open'); setupEl.setAttribute('aria-hidden', 'false');
+}
+function closeSetup() { setupEl.classList.remove('open'); setupEl.setAttribute('aria-hidden', 'true'); }
+$('btn-setup').addEventListener('click', () => { if (phase === 'start') openSetup(); });
+$('btn-setup2').addEventListener('click', openSetup);
+$('btn-close-setup').addEventListener('click', closeSetup);
+$('btn-setup-copy').addEventListener('click', async () => {
+  const b = $('btn-setup-copy'); const box = $('setup-url');
+  let ok = false;
+  try { await navigator.clipboard.writeText(autoUrl()); ok = true; } catch { /* fall back */ }
+  if (!ok) {
+    try {
+      const r = document.createRange(); r.selectNodeContents(box);
+      const sel = getSelection(); sel.removeAllRanges(); sel.addRange(r);
+      ok = document.execCommand('copy');
+    } catch { /* ignore */ }
+  }
+  b.textContent = ok ? 'Copied ✓' : 'Selected — press and hold to copy';
+  setTimeout(() => { b.textContent = 'Copy link'; }, 2500);
+});
+$('btn-open-shortcuts').addEventListener('click', () => { location.href = 'shortcuts://'; });
+$('btn-a2hs').addEventListener('click', () => { $('a2hs-hint').hidden = false; });
+renderSetup();
 
 /* ---------- boot ---------- */
 $('btn-start').disabled = true;

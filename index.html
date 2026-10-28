@@ -36,6 +36,7 @@
     </button>
   </div>
   <div class="start-bottom">
+    <button id="btn-setup" class="setup-btn" type="button">⏰ Set up auto-open <span class="badge" data-setup-badge hidden>Done ✓</span></button>
     <div class="target-chip"><b id="start-icons"></b><span id="start-summary">missions to silence it</span></div>
     <p class="fine">Siren starts when you tap. Finish every mission to stop it.</p>
   </div>
@@ -134,6 +135,56 @@
       <input id="set-url" type="text" readonly>
       <button id="btn-copy" class="btn small" type="button">Copy</button>
     </div>
+    <button id="btn-setup2" class="setup-btn wide" type="button">⏰ Set up auto-open <span class="badge" data-setup-badge hidden>Done ✓</span></button>
+  </div>
+</div>
+
+<!-- 5. AUTO-OPEN SETUP -->
+<div id="setup" class="setup" aria-hidden="true">
+  <div class="setup-scroll" role="dialog" aria-label="Auto-open setup">
+    <div class="sheet-head"><h2>Auto-open</h2><button id="btn-close-setup" class="btn small" type="button">Done</button></div>
+    <p class="fine left">Make your phone open this alarm by itself when your Clock alarm stops. Five taps, once.</p>
+    <ol class="steps">
+      <li class="step" data-step="0">
+        <label class="step-head"><input type="checkbox"><span class="num">1</span><b>Copy your alarm link</b></label>
+        <div class="step-body">
+          <code id="setup-url" class="link-box"></code>
+          <button id="btn-setup-copy" class="btn primary" type="button">Copy link</button>
+        </div>
+      </li>
+      <li class="step" data-step="1">
+        <label class="step-head"><input type="checkbox"><span class="num">2</span><b>Open Shortcuts</b></label>
+        <div class="step-body">
+          <p>Tap <b>Automation</b> at the bottom, then <b>+</b> (or <b>New Automation</b>).</p>
+          <button id="btn-open-shortcuts" class="btn" type="button">Open Shortcuts ↗</button>
+        </div>
+      </li>
+      <li class="step" data-step="2">
+        <label class="step-head"><input type="checkbox"><span class="num">3</span><b>Pick the trigger</b></label>
+        <div class="step-body">
+          <p>Choose <b>Alarm</b> → <b>Is Stopped</b> → pick <b>Any</b> or your wake-up alarm → <b>Run Immediately</b> → Next/Done.</p>
+          <p class="note">iOS 17/18 shows Run Immediately as an option. Older iOS has a toggle instead: turn off “Ask Before Running”.</p>
+        </div>
+      </li>
+      <li class="step" data-step="3">
+        <label class="step-head"><input type="checkbox"><span class="num">4</span><b>Add two actions</b></label>
+        <div class="step-body">
+          <p>Search <b>Set Volume</b> → set it to 100%.</p>
+          <p>Search <b>Open URLs</b> → paste the link from step 1.</p>
+        </div>
+      </li>
+      <li class="step" data-step="4">
+        <label class="step-head"><input type="checkbox"><span class="num">5</span><b>Test it</b></label>
+        <div class="step-body">
+          <p>Set an alarm 1 minute ahead and stop it. This page should open.</p>
+          <div id="a2hs" class="a2hs">
+            <button id="btn-a2hs" class="btn" type="button">Add to Home Screen</button>
+            <p class="note" id="a2hs-hint" hidden>Tap Share <span aria-hidden="true">⎙</span> → Add to Home Screen.</p>
+          </div>
+        </div>
+      </li>
+    </ol>
+    <p class="fine honest">iPhone doesn't allow websites to create automations, so these taps have to be done by you, once.</p>
   </div>
 </div>
 
